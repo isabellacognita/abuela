@@ -106,6 +106,23 @@ def _new_file_kind(p, root, cfg):
     return any(fnmatch(rel, g) or fnmatch(os.path.basename(p), g) for g in cfg["build_new_files"])
 
 
+def _strip_heredocs(cmd):
+    """Words inside a heredoc are data being written, not commands being run. (Her first morning: she asked
+    about a "git push" that only appeared inside the test text I was writing.)"""
+    out, lines, i = [], cmd.split("\n"), 0
+    while i < len(lines):
+        out.append(lines[i])
+        m = re.search(r"<<-?\s*['\"]?(\w+)['\"]?", lines[i])
+        i += 1
+        if m:
+            while i < len(lines) and lines[i].strip() != m.group(1):
+                i += 1
+            if i < len(lines):
+                out.append(lines[i])
+                i += 1
+    return "\n".join(out)
+
+
 def what(d, cfg):
     """(kind, target) if she has something to say about this tool call, else None."""
     tool = d.get("tool_name")
@@ -128,13 +145,16 @@ def what(d, cfg):
         fp = _abs(ti.get("file_path", ""), cwd)
         return ("finish", fp) if any(r.search(fp) for r in finish_paths) else None
     if tool == "Bash":
-        cmd = ti.get("command", "")
+        cmd = _strip_heredocs(ti.get("command", ""))
         if any(x in cmd for x in cfg["pass_if"]):
             return None
         for pat in cfg["send"]:
             m = re.search(pat, cmd)
             if m:
-                return ("send", (m.group(0) + " " + cmd[m.end():m.end() + 80]).strip())
+                # The thing is the send itself, up to the next shell separator, so adding "; git status"
+                # after it the second time doesn't make it a new thing (found on her first push, 2026-10-10).
+                rest = re.split(r"\s*(?:;|&&|\|\||\||\n)", cmd[m.end():], maxsplit=1)[0]
+                return ("send", (m.group(0) + rest)[:160].strip())
         words = "|".join(re.escape(w) for w in cfg["finish_commit_words"])
         if words:
             m = re.search(r"git\s+commit\b[^\n]*\b(" + words + r")\b", cmd, re.I)

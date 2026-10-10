@@ -54,6 +54,16 @@ class AbuelaTest(unittest.TestCase):
         self.assertEqual(self.check("Bash", {"command": "npm publish --dry-run"}), 0)
         self.assertEqual(self.check("Bash", {"command": "git status && git log -1"}), 0)
 
+    def test_a_send_is_the_same_send_whatever_follows_it(self):
+        self.assertEqual(self.check("Bash", {"command": "git push -u origin main 2>&1 | tail -3"}, "s7"), 2)
+        self.assertEqual(self.check("Bash", {"command": "git push -u origin main 2>&1 | tail -3; git status -sb"}, "s7"), 0)
+        self.assertEqual(self.check("Bash", {"command": "git push -u origin other"}, "s7"), 2)  # a different send
+
+    def test_words_inside_a_heredoc_are_not_commands(self):
+        writing = "cat > notes.md <<'EOF'\nremember: git push after review\nEOF"
+        self.assertEqual(self.check("Bash", {"command": writing}, "s8"), 0)
+        self.assertEqual(self.check("Bash", {"command": writing + "\ngit push origin main"}, "s8"), 2)
+
     def test_finish(self):
         self.assertEqual(self.check("Write", {"file_path": self.p("essay-FINAL.md"), "content": "x"}), 2)
         self.assertEqual(self.check("Bash", {"command": "git commit -m 'chapter 3: finished'"}), 2)
