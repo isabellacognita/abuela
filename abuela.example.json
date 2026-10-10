@@ -1,0 +1,22 @@
+{
+  "_what": "Copy to .claude/abuela.json in your project (or point $ABUELA_CONFIG at it). Every key is optional; anything you leave out keeps its default from abuela.py.",
+  "root": null,
+  "quiet": ["/tmp/", "/.git/", "node_modules/", "__pycache__", "/.claude/", "/.venv", "/log/", "notes/private/"],
+  "build_new_dirs": true,
+  "build_new_files": ["*.py", "*.js", "*.ts", "*.sh"],
+  "send": [
+    "\\bgit\\s+push\\b",
+    "\\bgh\\s+pr\\s+(create|merge)\\b",
+    "\\bnpm\\s+publish\\b",
+    "my_mail_tool\\.py\\s+send\\b"
+  ],
+  "finish_paths": ["FINAL", "(^|/)DONE(\\.|$)"],
+  "finish_commit_words": ["finished", "final"],
+  "grace_seconds": 600,
+  "log": "~/.cache/abuela/abuela.jsonl",
+  "voice": {
+    "build": ["Tía Rosa: Before you make another thing, what is it for, and is it yours or just what's in front of you?"],
+    "send": ["Tía Rosa: Did you read it once more as the person getting it?"],
+    "finish": ["Tía Rosa: Finished, or tired?"]
+  }
+}
