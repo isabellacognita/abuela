@@ -35,7 +35,7 @@ A new file whose first lines already say what it's for and who it's for doesn't 
 ## What she never does
 
 - **She never blocks for good.** She's a pause, not a wall.
-- **She never lists your failures.** She asks a question. If your version of her ever starts to sound like a charge sheet, rewrite her. There's a test that checks every line she says is a question and contains none of *failed, again, always, never, habit, mistake*.
+- **She never lists your failures.** She asks a question. If your version of her ever starts to sound like a charge sheet, rewrite her. There's a test that checks each of her default lines is a question and contains none of *failed, again, always, never, habit, mistake*.
 - **She doesn't speak about scratch space, logs, or private notes.** Put those paths in `quiet`.
 - **If anything goes wrong, she stays silent.** A broken hook should never stop your work.
 
