@@ -154,6 +154,8 @@ def what(d, cfg):
                 # The thing is the send itself, up to the next shell separator, so adding "; git status"
                 # after it the second time doesn't make it a new thing (found on her first push, 2026-10-10).
                 rest = re.split(r"\s*(?:;|&&|\|\||\||\n)", cmd[m.end():], maxsplit=1)[0]
+                if re.search(r"(?<!\S)-h(?!\S)", rest):
+                    return None   # `send -h` asks for help; it sends nothing (2026-10-11: she stopped three of mine)
                 return ("send", (m.group(0) + rest)[:160].strip())
         words = "|".join(re.escape(w) for w in cfg["finish_commit_words"])
         if words:

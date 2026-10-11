@@ -54,6 +54,11 @@ class AbuelaTest(unittest.TestCase):
         self.assertEqual(self.check("Bash", {"command": "npm publish --dry-run"}), 0)
         self.assertEqual(self.check("Bash", {"command": "git status && git log -1"}), 0)
 
+    def test_asking_a_send_for_help_is_not_a_send(self):
+        self.assertEqual(self.check("Bash", {"command": "git push -h"}, "s8"), 0)
+        self.assertEqual(self.check("Bash", {"command": "gh pr create -h 2>&1 | tail -8"}, "s8"), 0)
+        self.assertEqual(self.check("Bash", {"command": "df -h; git push origin main"}, "s8"), 2)  # -h on another command
+
     def test_a_send_is_the_same_send_whatever_follows_it(self):
         self.assertEqual(self.check("Bash", {"command": "git push -u origin main 2>&1 | tail -3"}, "s7"), 2)
         self.assertEqual(self.check("Bash", {"command": "git push -u origin main 2>&1 | tail -3; git status -sb"}, "s7"), 0)
