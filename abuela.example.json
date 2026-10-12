@@ -13,6 +13,7 @@
   "finish_paths": ["FINAL", "(^|/)DONE(\\.|$)"],
   "finish_commit_words": ["finished", "final"],
   "grace_seconds": 600,
+  "chancleta": false,
   "log": "~/.cache/abuela/abuela.jsonl",
   "voice": {
     "build": ["Tía Rosa: Before you make another thing, what is it for, and is it yours or just what's in front of you?"],

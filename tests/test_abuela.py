@@ -74,6 +74,27 @@ class AbuelaTest(unittest.TestCase):
         self.assertEqual(self.check("Bash", {"command": "git commit -m 'chapter 3: finished'"}), 2)
         self.assertEqual(self.check("Bash", {"command": "git commit -m 'chapter 3: second pass'"}), 0)
 
+    def test_without_a_chancleta_answering_her_is_going_ahead(self):
+        ti = {"command": "git push origin main"}
+        self.assertEqual(self.check("Bash", ti, "c0"), 2)
+        self.assertEqual(self.check("Bash", ti, "c0"), 0)
+
+    def test_with_a_chancleta_she_will_not_ask_twice(self):
+        self.cfg["chancleta"] = True
+        ti = {"command": "git push origin main"}
+        self.assertEqual(self.check("Bash", ti, "c1"), 2)
+        code, words = abuela.check(self.ev("Bash", ti, "c1"), self.cfg)
+        self.assertEqual(code, 2)
+        self.assertIn("chancleta", words)
+        self.assertEqual(abuela.permiso(self.cfg), 0)          # the human's word
+        self.assertEqual(self.check("Bash", ti, "c1"), 0)
+        self.assertEqual(self.check("Bash", {"command": "git push origin other"}, "c1"), 2)  # one thing, not all
+        acts = [json.loads(l)["action"] for l in Path(self.cfg["log"]).read_text().splitlines()]
+        self.assertEqual(acts, ["spoke", "chancleta", "permiso", "spoke"])
+
+    def test_permiso_with_nothing_stopped(self):
+        self.assertEqual(abuela.permiso(self.cfg), 1)
+
     def test_she_asks_and_never_accuses(self):
         for kind, lines in abuela.DEFAULTS["voice"].items():
             for line in lines:

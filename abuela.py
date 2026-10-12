@@ -7,7 +7,8 @@ written rules don't hold at the moment that matters.
 
 Before you build something new, send something out, or call something finished, she asks one question.
 Ask again within ten minutes and she lets you go: answering her is going ahead. She never blocks for good,
-and she never lists your failures.
+and she never lists your failures. Unless you give her a chancleta ("chancleta": true): then she will not ask
+twice, and only `abuela.py permiso`, run by your human, lets that one thing through.
 
 Protocol: reads one PreToolUse event (JSON) on stdin. Exit 0 = nothing to say. Exit 2 = she spoke; the
 words are on stderr, and Claude Code shows them to the model in place of that one tool call.
@@ -41,6 +42,9 @@ DEFAULTS = {
     # A command containing any of these never gets asked about.
     "pass_if": ["--dry-run", "--help"],
     "grace_seconds": 600,
+    # A hard stop, for houses that want one. She asks once; the second try meets the chancleta, and only
+    # `python3 abuela.py permiso` (run by your human, not by you) lets that one thing through.
+    "chancleta": False,
     "marks_dir": None,   # null = ~/.cache/abuela
     "log": None,         # a .jsonl path, to see whether she's become wallpaper
     "voice": {
@@ -62,6 +66,10 @@ DEFAULTS = {
         "finish": [
             "Abuela: ¿Terminada, o cansada? Finished, or just tired of it? Look once more as a stranger "
             "would. If it's done, say why in a line.",
+        ],
+        "chancleta": [
+            "Abuela: ¿Qué te dije? La chancleta está en el aire. This one waits for your human's permiso "
+            "(they run: python3 abuela.py permiso). She will not ask twice.",
         ],
     },
 }
@@ -188,11 +196,23 @@ def check(d, cfg=None):
     mark = marks / key
     ev = {"ts": time.strftime("%Y-%m-%dT%H:%M:%S"), "kind": kind, "target": target[-160:],
           "session": d.get("session_id")}
-    if mark.exists() and time.time() - mark.stat().st_mtime < cfg["grace_seconds"]:
+    fresh = lambda m: m.exists() and time.time() - m.stat().st_mtime < cfg["grace_seconds"]
+    if cfg.get("chancleta"):
+        if fresh(marks / (key + ".permiso")):
+            ev["action"] = "permiso"
+            _log(cfg, ev)
+            return 0, ""
+        if fresh(mark):
+            (marks / "last").write_text(key)
+            ev["action"] = "chancleta"
+            _log(cfg, ev)
+            return 2, (cfg["voice"].get("chancleta") or DEFAULTS["voice"]["chancleta"])[0]
+    elif fresh(mark):
         ev["action"] = "went-ahead"
         _log(cfg, ev)
         return 0, ""
     mark.touch()
+    (marks / "last").write_text(key)
     ev["action"] = "spoke"
     _log(cfg, ev)
     lines = cfg["voice"].get(kind) or DEFAULTS["voice"][kind]
@@ -211,7 +231,22 @@ def _log(cfg, ev):
         pass
 
 
+def permiso(cfg=None):
+    """For your human: let through the last thing she stopped, once, for grace_seconds."""
+    cfg = cfg or load_config()
+    marks = Path(os.path.expanduser(cfg["marks_dir"] or "~/.cache/abuela"))
+    last = marks / "last"
+    if not last.exists():
+        print("Abuela: no hay nada que perdonar.")
+        return 1
+    (marks / (last.read_text().strip() + ".permiso")).touch()
+    print("Abuela: Bueno. Esta vez, sí. (permiso for one thing, " + str(cfg["grace_seconds"]) + " seconds)")
+    return 0
+
+
 def main():
+    if sys.argv[1:2] == ["permiso"]:
+        return permiso()
     try:
         d = json.load(sys.stdin)
         code, words = check(d)

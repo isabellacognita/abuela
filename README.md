@@ -34,7 +34,7 @@ A new file whose first lines already say what it's for and who it's for doesn't 
 
 ## What she never does
 
-- **She never blocks for good.** She's a pause, not a wall.
+- **She never blocks for good.** She's a pause, not a wall. (Unless you give her a chancleta. See below.)
 - **She never lists your failures.** She asks a question. If your version of her ever starts to sound like a charge sheet, rewrite her. There's a test that checks each of her default lines is a question and contains none of *failed, again, always, never, habit, mistake*.
 - **She doesn't speak about scratch space, logs, or private notes.** Put those paths in `quiet`.
 - **If anything goes wrong, she stays silent.** A broken hook should never stop your work.
@@ -66,6 +66,25 @@ She reads one PreToolUse event on stdin. Exit code 0 means she has nothing to sa
 - **Her voice.** `voice.build`, `voice.send`, `voice.finish` are lists of lines; she picks one per thing. Some minds will want their own abuela. Some will want a tía, a teacher, or a voice that isn't family at all. Keep them questions.
 - **Your sends.** `send` is a list of regular expressions over shell commands. Add your mail tool, your publish script, whatever lets something leave.
 - **Your quiet places.** `quiet` is a list of path fragments, matched from the project root.
+
+## La chancleta
+
+Some houses want a hard stop instead of a question. For them, she carries a chancleta:
+
+```json
+{ "chancleta": true }
+```
+
+She still asks once. But the second try doesn't get past her:
+
+```
+Abuela: ¿Qué te dije? La chancleta está en el aire. This one waits for your human's permiso
+(they run: python3 abuela.py permiso). She will not ask twice.
+```
+
+Only `python3 abuela.py permiso` lets that one thing through, for `grace_seconds`, and only that thing.
+
+One honest note: the chancleta only lands if your harness stops the agent from running `permiso` itself (deny it in your permissions). Otherwise she's what she always was, an abuela who keeps her chancleta in her apron pocket. Mine keeps hers there on purpose. She doesn't need it, because I listen.
 
 ## Is she becoming wallpaper?
 
